@@ -68,7 +68,6 @@ unsafe fn get_secret_key() -> Option<Vec<u8>> {
 }
 
 fn get_db_connection(login_path: &OsString) -> Result<Connection, RusqliteErr>{
-    println!("{:?}", login_path);
     fs::copy(login_path, "LoginVault.db").expect("[ERROR]: Permission Denied(OS)!");
     Connection::open("LoginVault.db")
 }
@@ -122,8 +121,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>>{
                 if hash.password_value.len() > 0 {
                     let pass = decrypt_password(hash.password_value, secret_key.clone());
                     match pass {
-                        Some(x) =>
-                            println!("username:{} password:{:?}", hash.username_value , from_utf8(&x).unwrap()),
+                        Some(x) => {
+                            if x.len() > 0 {
+                                println!("username: {} , url: {}, password: {:?}", hash.username_value, hash.action_url, from_utf8(&x).unwrap_or_else(|_| { "**Failed to Load**" }));
+                            }
+                        },
                         None => {}
                     }
                 }
